@@ -1,18 +1,10 @@
-unsigned long adc_result = 0;
-register unsigned int adc_data = 0;
-
-void setupADC_int();
-
-void ADC_ISR() iv IVT_INT_ADC1_2 ics ICS_AUTO {
-  adc_data = (ADC1_DR & 0x0FFF);
-}
-
-char *ButtonStrBuffer;
 
 void buttonAction(int a, int b, int c, int d);
 int computeMap( int value, int optionXorY);
 void writePair(char * valueX, char * valueY, int x, int y);
 void carefulPrinter(char * str);
+
+char *ButtonStrBuffer;
 
 void main() {
   int buttonA;
@@ -22,26 +14,22 @@ void main() {
 
   char textValueX[200];
   char textValueY[200];
-  char debTextValueX[200];
-  char debTextValueY[200];
-
-  int debX;
-  int debY;
 
   unsigned long valueX;
   unsigned long valueY;
 
-  //UART CODE
+  //UART Initialization
   UART1_Init(56000);
   // Wait for UART module to stabilize
   Delay_ms(100);
   UART1_Write_Text("Start\r\n");
 
-  //Set PORTD as output
+  //Set PORTD and PORTC as output
+  // These will display the postion of the joystick
   GPIO_Digital_Output(&GPIOD_ODR, _GPIO_PINMASK_LOW);
   GPIO_Digital_Output(&GPIOC_ODR, _GPIO_PINMASK_LOW);
 
-  //Setup four buttons
+  //Setup four buttons for input
   GPIO_Digital_Input(&GPIOD_IDR, _GPIO_PINMASK_0);
 
   // Choose ADC channel
@@ -57,44 +45,50 @@ void main() {
     valueX = ADC1_Get_Sample(3);
     valueY = ADC1_Get_Sample(4);
 
+    //Ensures that joystick index values are not over 3
     if ( (computeMap(valueX , 0) < 3) && ( computeMap(valueY , 1) < 3 ) ) {
-
+      //Converts index to string
       IntToStr(computeMap(valueX , 0), textValueX);
       IntToStr( computeMap(valueY , 1), textValueY);
-
+      
+      //Prints to the UART
       writePair(textValueX, textValueY, (computeMap(valueX , 0) < 3),  computeMap(valueY , 1));
       Delay_ms(100);
+      
       //Reads from buttons
       buttonAction(buttonA, buttonB, buttonC, buttonD);
     }
   }
 }
 
-void buttonAction(int Da, int Db, int Dc, int Dd) {
+//Monitors when buttons are pressed
+void buttonAction(int pressed_A, int pressed_B, int pressed_C, int pressed_D) {
+  //Flags to monitor when a button has been already pressed
   int shownA , shownB, shownC, shownD;
+  
   if (Button(&GPIOD_IDR, 8 , 1, 1)) {
-    Da = 1;
-    Db = 0;
-    Dc = 0;
-    Dd = 0;
+    pressed_A = 1;
+    pressed_B = 0;
+    pressed_C = 0;
+    pressed_D = 0;
   }
   if (Button(&GPIOD_IDR, 9, 1, 1)) {
-    Da = 0;
-    Db = 1;
-    Dc = 0;
-    Dd = 0;
+    pressed_A = 0;
+    pressed_B = 1;
+    pressed_C = 0;
+    pressed_D = 0;
   }
   if (Button(&GPIOD_IDR, 10, 1, 1)) {
-    Da = 0;
-    Db = 0;
-    Dc = 1;
-    Dd = 0;
+    pressed_A = 0;
+    pressed_B = 0;
+    pressed_C = 1;
+    pressed_D = 0;
   }
   if (Button(&GPIOD_IDR, 11, 1, 1)) {
-    Da = 0;
-    Db = 0;
-    Dc = 0;
-    Dd = 1;
+    pressed_A = 0;
+    pressed_B = 0;
+    pressed_C = 0;
+    pressed_D = 1;
   }
 
   // Initial values
@@ -103,7 +97,7 @@ void buttonAction(int Da, int Db, int Dc, int Dd) {
   shownC = 0;
   shownD = 0;
 
-  if ( Da == 1 && shownA == 0) {
+  if ( pressed_A == 1 && shownA == 0) {
     shownA = 1;
     shownB = 0;
     shownC = 0;
@@ -111,7 +105,7 @@ void buttonAction(int Da, int Db, int Dc, int Dd) {
     carefulPrinter("0000\r\n");
     Delay_ms(100);
   }
-  if ( Db == 1 && shownB == 0) {
+  if ( pressed_B == 1 && shownB == 0) {
     shownA = 0;
     shownB = 1;
     shownC = 0;
@@ -119,7 +113,7 @@ void buttonAction(int Da, int Db, int Dc, int Dd) {
     carefulPrinter("0001\r\n");
     Delay_ms(100);
   }
-  if ( Dc == 1 &&  shownC == 0) {
+  if ( pressed_C == 1 &&  shownC == 0) {
     shownA = 0;
     shownB = 0;
     shownC = 1;
@@ -127,7 +121,7 @@ void buttonAction(int Da, int Db, int Dc, int Dd) {
     carefulPrinter("0010\r\n");
     Delay_ms(100);
   }
-  if ( Dd == 1 && shownD == 0) {
+  if ( pressed_D == 1 && shownD == 0) {
     shownA = 0;
     shownB = 0;
     shownC = 0;
@@ -137,6 +131,7 @@ void buttonAction(int Da, int Db, int Dc, int Dd) {
   }
 }
 
+//Sets joystick index value on LEDS
 int computeMap( int value, int optionXorY) {
   if ( value > 3500 ) {
     if (optionXorY == 0) GPIOD_ODR = 16;
@@ -165,9 +160,8 @@ int computeMap( int value, int optionXorY) {
   }
 }
 
-
+//Prints values non-sequently (Button values)
 void carefulPrinter(char* str) {
-//Button output
     if (strcmp( ButtonStrBuffer , str) != 0 ) {
       UART1_Write_Text(str);
     } else {
@@ -177,12 +171,10 @@ void carefulPrinter(char* str) {
     ButtonStrBuffer = str;
 }
 
-char *bufferXValue;
-char *bufferYValue;
+//Variables for writePair function
 int holdX;
 int holdY;
-
-
+//Prints values non-sequently (Order pair value)
 void writePair(char* xValue, char * yValue, int x, int y) {
   if(x != holdX || y != holdY){
     char bufferOrderPair[] = "(";
@@ -192,7 +184,6 @@ void writePair(char* xValue, char * yValue, int x, int y) {
     strcat(bufferOrderPair, " )\r\n");
     UART1_Write_Text(bufferOrderPair);
   }else{
-   //UART1_Write_Text("here2");
    }
    holdX = x;
    holdY = y ;
