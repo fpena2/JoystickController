@@ -5,7 +5,7 @@
   - Visual Studio 
   - openFrameworks
 
-###### Use the MikroC's Library Manager to include the following libraries:
+###### Use MikroC's Library Manager to include the following libraries:
   - ADC
   - Button
   - Conversions
