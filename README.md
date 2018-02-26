@@ -5,6 +5,10 @@
   - Visual Studio 
   - openFrameworks
 
+##### Hardware Needed: 
+  - EasyMx PRO v7 for STM32
+  - SparkFun Joystick Shield Kit
+  
 ###### Use MikroC's Library Manager to include the following libraries:
   - ADC
   - Button
