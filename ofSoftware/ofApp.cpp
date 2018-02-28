@@ -133,10 +133,10 @@ void ofApp::update() {
   //================= Graphics ===============================
   previous = current;
   // generate a 3d position
-  current.x = xAxisMovement; //(xx, 0, 0);//ofSignedNoise(xx, 0, 0);
-  current.y = yAxisMovement; //(0, yx, 0);//ofSignedNoise(0, 0, 0);
-  current.z = 0;  //(0, 0, 0);//ofSignedNoise(0, 0, yx);
-  current *= 30;  // scale from -1,+1 range to -400,+400
+  current.x = xAxisMovement; 
+  current.y = yAxisMovement; 
+  current.z = 0;  
+  current *= 30;  // scale from -1,+1 range to -30,+30
 
   // add the current position to the pathVertices deque
   pathVertices.push_back(current);
