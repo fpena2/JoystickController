@@ -19,5 +19,5 @@
 
 ## Demo
 <p align="center">
-  <img width="509" height="472" src="resources/output.GIF">
+  <img width="509" height="472" src="resources/output.gif">
 </p>
