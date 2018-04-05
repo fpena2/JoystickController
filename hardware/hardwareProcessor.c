@@ -1,4 +1,4 @@
-
+// Funtions declerations 
 void buttonAction(int a, int b, int c, int d);
 int computeMap( int value, int optionXorY);
 void writePair(char * valueX, char * valueY, int x, int y);
@@ -38,7 +38,7 @@ void main() {
   //Configures ADC module to work with default settings
   ADC1_Init();
 
-  GPIOD_ODR = 0; //clear leds
+  GPIOD_ODR = 0; //clear leds on port D
 
   while (1) {
     //Read values for UART
@@ -51,7 +51,7 @@ void main() {
       IntToStr(computeMap(valueX , 0), textValueX);
       IntToStr( computeMap(valueY , 1), textValueY);
       
-      //Prints to the UART
+      //Prints to the UART as order pair 
       writePair(textValueX, textValueY, (computeMap(valueX , 0) < 3),  computeMap(valueY , 1));
       Delay_ms(100);
       
