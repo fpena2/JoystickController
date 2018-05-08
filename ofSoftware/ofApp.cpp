@@ -118,7 +118,7 @@ void ofApp::update() {
   else if (cleanBuffer.length() != 0 && cleanBuffer.length() == 4 &&
            strspn(cleanBuffer.c_str(), "01") == cleanBuffer.size()) {
     // cout << cleanBuffer << endl;
-    extractIntegerWords(spacedCleanBuffer, result);
+    extractIntegers(spacedCleanBuffer, result);
     string num = "";
     for (int val : result)
       num += to_string(val);
